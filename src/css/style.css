@@ -2,3 +2,174 @@
     margin: 0;
     padding: 0;
 }
+
+button {
+    background-color: white;
+}
+
+#timeline {
+    display: flex;
+    position: relative;
+    width: 600px;
+    height: 800px;
+    margin: 20px auto auto auto;
+    flex-direction: column;
+}
+
+.timeline-records {
+    border: 1px solid black;
+    border-radius: 7px;
+    width: 100%;
+    height: 87%;
+}
+
+.timeline-input {
+    display: flex;
+    border: 1px solid black;
+    border-radius: 7px;
+    margin-top: auto;
+    width: 100%;
+    height: 10%;
+}
+
+.timeline-input-text {
+    margin: 3px;
+    padding-left: 3px;
+    padding-top: 3px;
+    width: 80%;
+    border: none;
+    resize: none;
+}
+
+.timeline-input-text:focus {
+    border: none;
+    resize: none;
+    outline: none;
+}
+
+.timeline-input-buttons {
+    display: flex;
+}
+
+.input-btn {
+    margin: auto 9px auto auto;
+    width: 52px;
+    height: 52px;
+    border: 1px solid black;
+    border-radius: 50%;
+}
+
+.timeline-input-audio {
+    background-image: url(../image/microphone.png);
+    background-size: calc(100% - 12px);
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.timeline-input-video {
+    background-image: url(../image/video_camera.png);
+    background-size: calc(100% - 10px);
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.modal {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: 40px;
+    left: 10%;
+    z-index: 1;
+    border: 1px solid black;
+    border-radius: 5px;
+    width: 80%;
+    height: 25%;
+}
+
+.modal-text {
+    padding: 10px;
+}
+
+.modal-title {
+    margin-bottom: 5px;
+    font-weight: normal;
+}
+
+.modal-message {
+
+}
+
+.modale-input {
+    padding: 0px 10px 10px 10px;
+}
+
+.modal-input-title {
+    font-weight: normal;
+    margin-bottom: 5px;
+}
+
+.modal-input-text {
+    width: 100%;
+    height: 25px;
+    padding-left: 3px;
+}
+
+.modal-input-buttons {
+    display: flex;
+    position: relative;
+    margin-top: 7px;
+}
+
+.btn {
+    border: 1px solid black;
+    border-radius: 5px;
+    height: 30px;
+}
+
+.modal-cancel {
+    margin-left: auto;
+    margin-right: 7px;
+    width: 90px;
+}
+
+.modal-ok {
+    width: 50px;
+}
+
+.record {
+    display: flex;
+    flex-direction: column;
+    padding: 5px;
+    width: 95%;
+    margin: 4px auto 0 auto;
+    border: 1px solid black;
+    border-radius: 5px;
+}
+
+.record-date {
+    margin-left: auto;
+}
+
+.coordinates {
+    display: flex;
+}
+
+.img-coordinates {
+    background-image: url(../image/pin.png);
+    width: 16px;
+    height: 16px;
+    margin-left: 3px;
+    align-self: center;
+}
+
+.input-error {
+    position: absolute;
+    padding: 6px;
+    top: -8px;
+    background-color: rgb(252, 146, 146);
+    border: 1px solid black;
+}
+
+.none {
+    display: none;
+}
