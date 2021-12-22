@@ -77,7 +77,7 @@ export default class Timeline {
       const coorArr = coordinates.split(',');
       const latitude = coorArr[0].trim();
       const longitude = coorArr[1].trim();
-      if (validate(latitude, longitude)) {
+      if (validate(coordinates)) {
         this.coordinates = `[${latitude}, ${longitude}]`;
       }
     });
