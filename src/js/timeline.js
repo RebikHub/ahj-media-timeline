@@ -1,4 +1,5 @@
 import validate from './validateCoordinates';
+import geolocation from './geolocation';
 
 export default class Timeline {
   constructor() {
@@ -52,8 +53,14 @@ export default class Timeline {
     });
   }
 
+  async geo() {
+    this.coordinates = await geolocation();
+  }
+
   inputTextEnter() {
     this.timelineInputText.addEventListener('keyup', (ev) => {
+      this.geo();
+
       if (ev.key === 'Enter' && this.coordinates === null) {
         this.modal.classList.remove('none');
         this.timelineInputText.value = null;
@@ -66,13 +73,19 @@ export default class Timeline {
 
   inputCoordinates() {
     this.modalInput.addEventListener('input', (ev) => {
-      this.coordinates = validate(ev.target.value);
+      const coordinates = ev.target.value;
+      const coorArr = coordinates.split(',');
+      const latitude = coorArr[0].trim();
+      const longitude = coorArr[1].trim();
+      if (validate(latitude, longitude)) {
+        this.coordinates = `[${latitude}, ${longitude}]`;
+      }
     });
   }
 
   clickOk() {
     this.ok.addEventListener('click', () => {
-      if (this.coordinates === false || this.coordinates === null) {
+      if (this.coordinates === null) {
         this.inputError();
       } else {
         this.modal.classList.add('none');
