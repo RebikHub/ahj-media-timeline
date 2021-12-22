@@ -21,6 +21,7 @@ button {
     border-radius: 7px;
     width: 100%;
     height: 87%;
+    overflow: auto;
 }
 
 .timeline-input {
@@ -59,18 +60,37 @@ button {
     border-radius: 50%;
 }
 
+.timer {
+    width: 60px;
+}
+
 .timeline-input-audio {
-    background-image: url(../image/microphone.png);
     background-size: calc(100% - 12px);
     background-repeat: no-repeat;
     background-position: center;
 }
 
+.image-audio {
+    background-image: url(../image/microphone.png);
+}
+
+.image-ok {
+    background-image: url(../image/check.png);
+}
+
 .timeline-input-video {
-    background-image: url(../image/video_camera.png);
     background-size: calc(100% - 10px);
     background-repeat: no-repeat;
     background-position: center;
+}
+
+.image-video {
+    background-image: url(../image/video_camera.png);
+}
+
+.image-cancel {
+    background-image: url(../image/cancel.png);
+    background-size: auto;
 }
 
 .modal {

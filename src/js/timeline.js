@@ -1,5 +1,6 @@
 import validate from './validateCoordinates';
 import geolocation from './geolocation';
+import Record from './record';
 
 export default class Timeline {
   constructor() {
@@ -12,27 +13,38 @@ export default class Timeline {
     this.ok = document.querySelector('.modal-ok');
     this.cancel = document.querySelector('.modal-cancel');
     this.error = document.querySelector('.input-error');
+    this.audioBtn = document.querySelector('.timeline-input-audio');
+    this.videoBtn = document.querySelector('.timeline-input-video');
+    this.timer = document.querySelector('.timer');
+    // this.okBtn = document.querySelector('.image-ok');
+    // this.stopBtn = document.querySelector('.image-cancel');
+    // this.record = null;
+    this.createElement = null;
   }
 
   events() {
     this.inputText();
     this.inputTextEnter();
     this.inputCoordinates();
-    this.clickOk();
-    this.clickCancel();
+    this.clickModalOk();
+    this.clickModalCancel();
+    this.clickAudioVideo(this.videoBtn);
+    this.clickAudioVideo(this.audioBtn);
+    // this.clickAVOk(document.querySelector('.image-ok'));
+    // this.clickAVCancel(document.querySelector('.image-cancel'));
   }
 
-  addRecord() {
+  addRecord(content) {
     const record = document.createElement('div');
     const date = document.createElement('div');
-    const content = document.createElement('div');
+    const contents = document.createElement('div');
     const coordinates = document.createElement('div');
     const numCoordinates = document.createElement('p');
     const imgCoordinates = document.createElement('div');
     coordinates.appendChild(numCoordinates);
     coordinates.appendChild(imgCoordinates);
     record.appendChild(date);
-    record.appendChild(content);
+    record.appendChild(contents);
     record.appendChild(coordinates);
     this.timelineRecords.appendChild(record);
     record.classList.add('record');
@@ -40,21 +52,113 @@ export default class Timeline {
     imgCoordinates.classList.add('img-coordinates');
     coordinates.classList.add('coordinates');
     date.textContent = Timeline.getDate();
-    content.textContent = this.message.trim();
+
+    if (typeof content === 'string') {
+      contents.textContent = content.trim();
+    } else {
+      contents.appendChild(content);
+    }
+
     numCoordinates.textContent = this.coordinates;
 
     this.message = null;
     this.coordinates = null;
   }
 
+  async geo() {
+    this.coordinates = await geolocation();
+  }
+
+  async transformButtonsOn(media) {
+    this.timer.classList.remove('none');
+    this.videoBtn.classList.remove('image-video');
+    this.videoBtn.classList.add('image-cancel');
+    this.audioBtn.classList.remove('image-audio');
+    this.audioBtn.classList.add('image-ok');
+    await this.record(media);
+  }
+
+  transformButtonsOff() {
+    this.timer.classList.add('none');
+    this.videoBtn.classList.add('image-video');
+    this.videoBtn.classList.remove('image-cancel');
+    this.audioBtn.classList.add('image-audio');
+    this.audioBtn.classList.remove('image-ok');
+    this.createElement = null;
+  }
+
+  async record(media) {
+    if (!window.MediaRecorder) {
+      return;
+    }
+
+    this.createElement = document.createElement(media);
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+    const recorder = new MediaRecorder(stream);
+    const chunks = [];
+
+    recorder.addEventListener('start', () => {
+      console.log('recording started');
+    });
+
+    recorder.addEventListener('dataavailable', (ev) => {
+      console.log('data available');
+      chunks.push(ev.data);
+    });
+
+    recorder.addEventListener('stop', () => {
+      console.log('recording stopped');
+      const blob = new Blob(chunks);
+      this.createElement.src = URL.createObjectURL(blob);
+    });
+
+    recorder.start();
+    // clickAVOk(element, recorder) {
+    //   element.addEventListener('click', () => {
+    //     this.geo();
+    //     this.addRecord(this.createElement);
+    //     console.log('ok');
+    //     recorder.stop();
+    //     this.transformButtonsOff();
+    //   });
+    // }
+
+    // clickAVCancel(element, recorder) {
+    //   element.addEventListener('click', () => {
+    //     console.log('cancel');
+    //     recorder.stop();
+    //     this.transformButtonsOff();
+    //   });
+    // }
+
+    document.querySelector('.image-ok').onclick = () => {
+      this.geo();
+      this.addRecord(this.createElement);
+      console.log('ok');
+      recorder.stop();
+      this.transformButtonsOff();
+    };
+    document.querySelector('.image-cancel').onclick = () => {
+      console.log('cancel');
+      recorder.stop();
+      this.transformButtonsOff();
+    };
+  }
+
+  clickAudioVideo(element) {
+    element.addEventListener('click', () => {
+      if (this.timer.classList.contains('none') && element.classList.contains('image-audio')) {
+        this.transformButtonsOn('audio');
+      } else if (this.timer.classList.contains('none') && element.classList.contains('image-video')) {
+        this.transformButtonsOn('video');
+      }
+    });
+  }
+
   inputText() {
     this.timelineInputText.addEventListener('input', (ev) => {
       this.message = ev.target.value;
     });
-  }
-
-  async geo() {
-    this.coordinates = await geolocation();
   }
 
   inputTextEnter() {
@@ -65,7 +169,7 @@ export default class Timeline {
         this.modal.classList.remove('none');
         this.timelineInputText.value = null;
       } else if (ev.key === 'Enter' && this.message !== null && this.coordinates !== null && this.coordinates !== false) {
-        this.addRecord();
+        this.addRecord(this.message);
         this.timelineInputText.value = null;
       }
     });
@@ -83,22 +187,22 @@ export default class Timeline {
     });
   }
 
-  clickOk() {
+  clickModalOk() {
     this.ok.addEventListener('click', () => {
       if (this.coordinates === null) {
         this.inputError();
       } else {
         this.modal.classList.add('none');
-        this.addRecord();
+        this.addRecord(this.message);
       }
     });
   }
 
-  clickCancel() {
+  clickModalCancel() {
     this.cancel.addEventListener('click', () => {
       this.coordinates = null;
       this.modalInput.value = null;
-      this.modal.classList.add('none');
+      this.modal.classList.toggle('none');
     });
   }
 
