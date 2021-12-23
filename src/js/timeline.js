@@ -16,9 +16,7 @@ export default class Timeline {
     this.audioBtn = document.querySelector('.timeline-input-audio');
     this.videoBtn = document.querySelector('.timeline-input-video');
     this.timer = document.querySelector('.timer');
-    // this.okBtn = document.querySelector('.image-ok');
-    // this.stopBtn = document.querySelector('.image-cancel');
-    // this.record = null;
+    this.recorder = null;
     this.createElement = null;
   }
 
@@ -30,52 +28,54 @@ export default class Timeline {
     this.clickModalCancel();
     this.clickAudioVideo(this.videoBtn);
     this.clickAudioVideo(this.audioBtn);
-    // this.clickAVOk(document.querySelector('.image-ok'));
-    // this.clickAVCancel(document.querySelector('.image-cancel'));
   }
 
   addRecord(content) {
-    const record = document.createElement('div');
-    const date = document.createElement('div');
-    const contents = document.createElement('div');
-    const coordinates = document.createElement('div');
-    const numCoordinates = document.createElement('p');
-    const imgCoordinates = document.createElement('div');
-    coordinates.appendChild(numCoordinates);
-    coordinates.appendChild(imgCoordinates);
-    record.appendChild(date);
-    record.appendChild(contents);
-    record.appendChild(coordinates);
-    this.timelineRecords.appendChild(record);
-    record.classList.add('record');
-    date.classList.add('record-date');
-    imgCoordinates.classList.add('img-coordinates');
-    coordinates.classList.add('coordinates');
-    date.textContent = Timeline.getDate();
-
-    if (typeof content === 'string') {
-      contents.textContent = content.trim();
+    if (this.coordinates === null) {
+      this.modal.classList.remove('none');
     } else {
-      contents.appendChild(content);
+      const record = document.createElement('div');
+      const date = document.createElement('div');
+      const coordinates = document.createElement('div');
+      const numCoordinates = document.createElement('p');
+      const imgCoordinates = document.createElement('div');
+      coordinates.appendChild(numCoordinates);
+      coordinates.appendChild(imgCoordinates);
+      record.appendChild(date);
+
+      if (typeof content === 'string') {
+        const contents = document.createElement('div');
+        record.appendChild(contents);
+        contents.textContent = content.trim();
+      } else {
+        record.appendChild(content);
+      }
+
+      record.appendChild(coordinates);
+      record.classList.add('record');
+      date.classList.add('record-date');
+      imgCoordinates.classList.add('img-coordinates');
+      coordinates.classList.add('coordinates');
+      date.textContent = Timeline.getDate();
+      this.timelineRecords.appendChild(record);
+      numCoordinates.textContent = this.coordinates;
+      this.message = null;
+      this.createElement = null;
+      this.coordinates = null;
     }
-
-    numCoordinates.textContent = this.coordinates;
-
-    this.message = null;
-    this.coordinates = null;
   }
 
   async geo() {
     this.coordinates = await geolocation();
   }
 
-  async transformButtonsOn(media) {
+  async transformButtonsOn() {
+    await this.geo();
     this.timer.classList.remove('none');
     this.videoBtn.classList.remove('image-video');
     this.videoBtn.classList.add('image-cancel');
     this.audioBtn.classList.remove('image-audio');
     this.audioBtn.classList.add('image-ok');
-    await this.record(media);
   }
 
   transformButtonsOff() {
@@ -84,73 +84,29 @@ export default class Timeline {
     this.videoBtn.classList.remove('image-cancel');
     this.audioBtn.classList.add('image-audio');
     this.audioBtn.classList.remove('image-ok');
-    this.createElement = null;
-  }
-
-  async record(media) {
-    if (!window.MediaRecorder) {
-      return;
-    }
-
-    this.createElement = document.createElement(media);
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-    const recorder = new MediaRecorder(stream);
-    const chunks = [];
-
-    recorder.addEventListener('start', () => {
-      console.log('recording started');
-    });
-
-    recorder.addEventListener('dataavailable', (ev) => {
-      console.log('data available');
-      chunks.push(ev.data);
-    });
-
-    recorder.addEventListener('stop', () => {
-      console.log('recording stopped');
-      const blob = new Blob(chunks);
-      this.createElement.src = URL.createObjectURL(blob);
-    });
-
-    recorder.start();
-    // clickAVOk(element, recorder) {
-    //   element.addEventListener('click', () => {
-    //     this.geo();
-    //     this.addRecord(this.createElement);
-    //     console.log('ok');
-    //     recorder.stop();
-    //     this.transformButtonsOff();
-    //   });
-    // }
-
-    // clickAVCancel(element, recorder) {
-    //   element.addEventListener('click', () => {
-    //     console.log('cancel');
-    //     recorder.stop();
-    //     this.transformButtonsOff();
-    //   });
-    // }
-
-    document.querySelector('.image-ok').onclick = () => {
-      this.geo();
-      this.addRecord(this.createElement);
-      console.log('ok');
-      recorder.stop();
-      this.transformButtonsOff();
-    };
-    document.querySelector('.image-cancel').onclick = () => {
-      console.log('cancel');
-      recorder.stop();
-      this.transformButtonsOff();
-    };
   }
 
   clickAudioVideo(element) {
     element.addEventListener('click', () => {
       if (this.timer.classList.contains('none') && element.classList.contains('image-audio')) {
-        this.transformButtonsOn('audio');
+        this.transformButtonsOn();
+        this.createElement = document.createElement('audio');
+        this.createElement.controls = true;
+        this.recorder = new Record(this.createElement, 'audio');
+        this.recorder.createRecord();
       } else if (this.timer.classList.contains('none') && element.classList.contains('image-video')) {
-        this.transformButtonsOn('video');
+        this.transformButtonsOn();
+        this.createElement = document.createElement('video');
+        this.createElement.controls = true;
+        this.recorder = new Record(this.createElement, 'video');
+        this.recorder.createRecord();
+      } else if (!this.timer.classList.contains('none') && element.classList.contains('image-ok')) {
+        this.addRecord(this.createElement);
+        this.recorder.recorder.stop();
+        this.transformButtonsOff();
+      } else if (!this.timer.classList.contains('none') && element.classList.contains('image-cancel')) {
+        this.recorder.recorder.stop();
+        this.transformButtonsOff();
       }
     });
   }
@@ -168,7 +124,7 @@ export default class Timeline {
       if (ev.key === 'Enter' && this.coordinates === null) {
         this.modal.classList.remove('none');
         this.timelineInputText.value = null;
-      } else if (ev.key === 'Enter' && this.message !== null && this.coordinates !== null && this.coordinates !== false) {
+      } else if (ev.key === 'Enter' && this.message !== null && this.coordinates !== null) {
         this.addRecord(this.message);
         this.timelineInputText.value = null;
       }
@@ -191,9 +147,14 @@ export default class Timeline {
     this.ok.addEventListener('click', () => {
       if (this.coordinates === null) {
         this.inputError();
-      } else {
+      } else if (this.message !== null) {
         this.modal.classList.add('none');
         this.addRecord(this.message);
+        this.modalInput.value = null;
+      } else if (this.createElement !== null) {
+        this.modal.classList.add('none');
+        this.addRecord(this.createElement);
+        this.modalInput.value = null;
       }
     });
   }
