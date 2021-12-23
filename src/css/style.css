@@ -65,7 +65,10 @@ button {
 }
 
 .timer {
+    font-size: x-large;
+    align-self: center;
     width: 60px;
+    margin: auto;
 }
 
 .timeline-input-audio {

@@ -19,6 +19,9 @@ export default class Timeline {
     this.timer = document.querySelector('.timer');
     this.recorder = null;
     this.createElement = null;
+    this.timerId = null;
+    this.min = 0;
+    this.sec = 0;
   }
 
   events() {
@@ -70,9 +73,33 @@ export default class Timeline {
     this.coordinates = await geolocation();
   }
 
+  timerRec() {
+    this.min = 0;
+    this.sec = 0;
+
+    this.timerId = setInterval(() => {
+      if (this.sec === 60) {
+        this.min += 1;
+        this.sec = 0;
+      }
+
+      if (this.min < 10 && this.sec < 10) {
+        this.timer.textContent = `0${this.min}:0${this.sec}`;
+      } else if (this.min < 10 && this.sec > 9) {
+        this.timer.textContent = `0${this.min}:${this.sec}`;
+      } else if (this.min > 9 && this.sec < 10) {
+        this.timer.textContent = `${this.min}:0${this.sec}`;
+      } else if (this.min > 9 && this.sec > 9) {
+        this.timer.textContent = `${this.min}:${this.sec}`;
+      }
+      this.sec += 1;
+    }, 1000);
+  }
+
   async transformButtonsOn() {
     await this.geo();
     this.timer.classList.remove('none');
+    this.timerRec();
     this.videoBtn.classList.remove('image-video');
     this.videoBtn.classList.add('image-cancel');
     this.audioBtn.classList.remove('image-audio');
@@ -102,6 +129,15 @@ export default class Timeline {
     }
   }
 
+  cancelRecord() {
+    clearInterval(this.timerId);
+    this.min = 0;
+    this.sec = 0;
+    this.timer.textContent = '';
+    this.recorder.recorder.stop();
+    this.transformButtonsOff();
+  }
+
   clickAudioVideo(element) {
     element.addEventListener('click', () => {
       if (this.timer.classList.contains('none') && element.classList.contains('image-audio')) {
@@ -109,12 +145,10 @@ export default class Timeline {
       } else if (this.timer.classList.contains('none') && element.classList.contains('image-video')) {
         this.record('video');
       } else if (!this.timer.classList.contains('none') && element.classList.contains('image-ok')) {
+        this.cancelRecord();
         this.addRecord(this.createElement);
-        this.recorder.recorder.stop();
-        this.transformButtonsOff();
       } else if (!this.timer.classList.contains('none') && element.classList.contains('image-cancel')) {
-        this.recorder.recorder.stop();
-        this.transformButtonsOff();
+        this.cancelRecord();
       }
     });
   }
