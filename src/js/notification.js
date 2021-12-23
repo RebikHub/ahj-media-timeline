@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 export default async function notificationBox() {
   if (!window.Notification) {
     return;
@@ -7,7 +8,14 @@ export default async function notificationBox() {
     body: 'Необходимо выдать право на запись или использовать другой браузер!',
     requireInteraction: true,
   });
-  notification.onerror = (error) => {
-    console.log(error);
-  };
+
+  console.log(Notification.permission);
+
+  if (Notification.permission === 'granted') {
+    return;
+  }
+
+  if (Notification.permission !== 'denied' || Notification.permission === 'default') {
+    Notification.requestPermission();
+  }
 }

@@ -121,7 +121,7 @@ export default class Timeline {
     await this.recorder.createRecord();
 
     if (!window.MediaRecorder || this.recorder.error !== null) {
-      notificationBox();
+      await notificationBox();
       this.recorder = null;
       this.createElement = null;
     } else {
