@@ -1,6 +1,7 @@
 import validate from './validateCoordinates';
 import geolocation from './geolocation';
 import Record from './record';
+import notificationBox from './notification';
 
 export default class Timeline {
   constructor() {
@@ -86,20 +87,27 @@ export default class Timeline {
     this.audioBtn.classList.remove('image-ok');
   }
 
+  async record(type) {
+    this.createElement = document.createElement(type);
+    this.createElement.controls = true;
+    this.recorder = new Record(this.createElement, type);
+    await this.recorder.createRecord();
+
+    if (!window.MediaRecorder || this.recorder.error !== null) {
+      notificationBox();
+      this.recorder = null;
+      this.createElement = null;
+    } else {
+      this.transformButtonsOn();
+    }
+  }
+
   clickAudioVideo(element) {
     element.addEventListener('click', () => {
       if (this.timer.classList.contains('none') && element.classList.contains('image-audio')) {
-        this.transformButtonsOn();
-        this.createElement = document.createElement('audio');
-        this.createElement.controls = true;
-        this.recorder = new Record(this.createElement, 'audio');
-        this.recorder.createRecord();
+        this.record('audio');
       } else if (this.timer.classList.contains('none') && element.classList.contains('image-video')) {
-        this.transformButtonsOn();
-        this.createElement = document.createElement('video');
-        this.createElement.controls = true;
-        this.recorder = new Record(this.createElement, 'video');
-        this.recorder.createRecord();
+        this.record('video');
       } else if (!this.timer.classList.contains('none') && element.classList.contains('image-ok')) {
         this.addRecord(this.createElement);
         this.recorder.recorder.stop();
