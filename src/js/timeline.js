@@ -159,18 +159,24 @@ export default class Timeline {
     });
   }
 
-  inputTextEnter() {
+  async inputTextEnter() {
     this.timelineInputText.addEventListener('keyup', (ev) => {
-      this.geo();
-
-      if (ev.key === 'Enter' && this.coordinates === null) {
-        this.modal.classList.remove('none');
-        this.timelineInputText.value = null;
-      } else if (ev.key === 'Enter' && this.message !== null && this.coordinates !== null) {
-        this.addRecord(this.message);
-        this.timelineInputText.value = null;
+      if (ev.key === 'Enter' && this.message !== null) {
+        this.requestGeo();
       }
     });
+  }
+
+  async requestGeo() {
+    await this.geo();
+
+    if (this.coordinates !== null) {
+      this.addRecord(this.message);
+      this.timelineInputText.value = null;
+    } else if (this.coordinates === null) {
+      this.modal.classList.remove('none');
+      this.timelineInputText.value = null;
+    }
   }
 
   inputCoordinates() {
